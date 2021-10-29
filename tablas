@@ -1,0 +1,201 @@
+use master
+go
+if exists (select * from sysdatabases where name = 'DBAtencionCliente')
+	drop database DBAtencionCliente
+go
+
+create database DBAtencionCliente
+go
+
+
+
+use DBAtencionCliente
+go
+
+if exists (select * from sysobjects where name = 'Estudiante' and Xtype = 'U')
+	drop table Estudiante
+go
+
+create table Estudiante(
+	CodigoUAC varchar(10) not null primary key,
+	Nombre varchar(50) not null,
+	Apellidos varchar(50) not null,
+	Grado varchar(20) not null,
+	Celular varchar(10) null
+)
+go
+
+if exists (select * from sysobjects where name = 'Secretaria' and Xtype = 'U')
+	drop table Secretaria
+go
+
+create table Secretaria(
+	DNI varchar(8) not null primary key,
+	Nombre varchar(50) not null,
+	Apellidos varchar(50) not null,
+	Celular varchar(10) null
+)
+go
+
+if exists (select * from sysobjects where name = 'Administrador' and Xtype = 'U')
+	drop table Administrador
+go
+
+create table Administrador(
+	DNI varchar(8) not null primary key,
+	Nombre varchar(50) not null,
+	Apellidos varchar(50) not null,
+	Celular varchar(10) null
+)
+go
+
+if exists (select * from sysobjects where name = 'Docente' and Xtype = 'U')
+	drop table Docente
+go
+
+create table Docente(
+	CodigoUAC varchar(10) not null primary key,
+	Nombre varchar(50) not null,
+	Apellidos varchar(50) not null,
+	Celular varchar(10) null
+)
+go
+
+if exists (select * from sysobjects where name = 'PreguntaFrecuente' and Xtype = 'U')
+	drop table PreguntaFrecuente
+go
+
+create table PreguntaFrecuente(
+	Id varchar(5) not null primary key,
+	Administrador varchar(8) not null,
+	Pregunta varchar(100) not null,
+	Respuesta varchar(100) not null,
+	foreign key (Administrador) references Administrador(DNI)
+)
+go
+
+if exists (select * from sysobjects where name = 'Reporte' and Xtype = 'U')
+	drop table Reporte
+go
+
+create table Reporte(
+	Id varchar(5) not null primary key,
+	Administrador varchar(8) not null,
+	Detalle varchar(40) null,
+	Fecha datetime not null,
+	foreign key (Administrador) references Administrador(DNI)
+)
+go
+
+if exists (select * from sysobjects where name = 'Coordinacion' and Xtype = 'U')
+	drop table Coordinacion
+go
+
+create table Coordinacion(
+	Id varchar(10) not null primary key,
+	Nombre varchar(40) not null,
+	Docente varchar(10) not null,
+	foreign key (Docente) references Docente(CodigoUAC)
+)
+go
+
+if exists (select * from sysobjects where name = 'Prioridad' and Xtype = 'U')
+	drop table Prioridad
+go
+
+create table Prioridad(
+	Id varchar(5) not null primary key,
+	Nombre varchar(10) not null,
+	Nivel int not null
+)
+go
+
+
+if exists (select * from sysobjects where name = 'Categoria' and Xtype = 'U')
+	drop table Categoria
+go
+
+create table Categoria(
+	Id varchar(10) not null primary key,
+	Nombre varchar(40) not null, 
+	Descripcion varchar(200) null,
+	Coordinacion varchar(10) not null,
+	Prioridad varchar(5) not null,
+	foreign key (Prioridad) references Prioridad(Id),
+	foreign key (Coordinacion) references Coordinacion(Id)
+)
+go
+
+if exists (select * from sysobjects where name = 'Tipo' and Xtype = 'U')
+	drop table Tipo
+go
+
+create table Tipo(
+	Id varchar(10) not null primary key,
+	Nombre varchar(20) not null,
+	Prioridad varchar(5) not null,
+	foreign key (Prioridad) references Prioridad(Id)
+)
+go
+
+if exists (select * from sysobjects where name = 'Solicitud' and Xtype = 'U')
+	drop table Solicitud
+go
+
+create table Solicitud(
+	Id varchar(5) not null primary key,
+	Encabezado varchar(50) not null,
+	Descripcion text not null,
+	Archivo varbinary(max) null,
+	Fecha datetime not null,
+	Categoria varchar(10) not null,
+	Estudiante varchar(10) not null,
+	foreign key (Estudiante) references Estudiante(CodigoUAC),
+	foreign key (Categoria) references Categoria(Id)
+)
+go
+
+if exists (select * from sysobjects where name = 'Mensaje' and Xtype = 'U')
+	drop table Mensaje
+go
+
+create table Mensaje(
+	Id varchar(5) not null primary key,
+	Cuerpo text not null,
+	Archivo varbinary(max) null,
+	Fecha datetime not null,
+	Solicitud varchar(5) not null,
+	Estudiante varchar(10) not null,
+	Docente varchar(10) null,
+	Administrador varchar(8) null,
+	Secretaria varchar(8) null,
+	foreign key (Solicitud) references Solicitud(Id),
+	foreign key (Estudiante) references Estudiante(CodigoUAC),
+	foreign key (Docente) references Docente(CodigoUAC),
+	foreign key (Administrador) references Administrador(DNI),
+	foreign key (Secretaria) references Secretaria(DNI)
+)
+go
+
+if exists (select * from sysobjects where name = 'CategoriaTipo' and Xtype = 'U')
+	drop table CategoriaTipo
+go
+
+create table CategoriaTipo(
+	Categoria varchar(10) not null,
+	Tipo varchar(10) not null,
+	primary key (Categoria, Tipo),
+	foreign key (Categoria) references Categoria(Id),
+	foreign key (Tipo) references Tipo(Id)
+)
+go
+
+select name, password_hash from sys.sql_logins
+go
+
+
+
+
+
+
+
